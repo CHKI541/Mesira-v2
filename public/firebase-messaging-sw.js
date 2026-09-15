@@ -16,12 +16,12 @@ importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js
 importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js");
 
 firebase.initializeApp({
-  apiKey: "REEMPLAZAR_API_KEY",
-  authDomain: "REEMPLAZAR_AUTH_DOMAIN",
-  projectId: "REEMPLAZAR_PROJECT_ID",
-  storageBucket: "REEMPLAZAR_STORAGE_BUCKET",
-  messagingSenderId: "REEMPLAZAR_SENDER_ID",
-  appId: "REEMPLAZAR_APP_ID",
+  apiKey: "AIzaSyBgDaO4SIBXQexDvR9vGOIjkoBR9YTj2iM",
+  authDomain: "mesira-argentina.firebaseapp.com",
+  projectId: "mesira-argentina",
+  storageBucket: "mesira-argentina.firebasestorage.app",
+  messagingSenderId: "67846483216",
+  appId: "1:67846483216:web:d9a40a5f2355aad65a8995",
 });
 
 const messaging = firebase.messaging();
