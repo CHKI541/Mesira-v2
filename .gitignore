@@ -1,0 +1,54 @@
+# Dependencias
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+
+# Build
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# Entorno — NUNCA commitear ningún .env real
+.env
+.env.*
+!.env.example
+
+# Credenciales de todo tipo. Si un archivo tiene una clave adentro, va acá.
+*.pem
+*.key
+*.p8
+*.p12
+*.jks
+*.keystore
+keystore.properties
+service-account*.json
+serviceAccount*.json
+firebase-adminsdk*.json
+google-services.json
+GoogleService-Info.plist
+
+# Documentación privada con credenciales (herencia del proyecto viejo)
+INICIO_NUEVA_CONVERSACION.md
+LEAME_PROYECTO.md
+DOCUMENTACION_*.md
+CREDENCIALES*.md
+
+# Herramientas
+.vercel
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Capacitor / Android (el proyecto nativo vive en su propio repo)
+/android
+/ios

@@ -1,0 +1,69 @@
+rules_version = '2';
+
+// ============================================================================
+// Reglas de Firestore — Mesira
+//
+// Principio de esta versión: el navegador NO escribe en Firestore. Nunca.
+// Toda mutación (crear, editar, borrar, marcar entregado, revelar un contacto)
+// pasa por una ruta del servidor en /api que verifica la cookie de sesión y
+// usa el Admin SDK, que se saltea estas reglas a propósito.
+//
+// Eso hace que estas reglas sean cortas y auditables de un vistazo: si algo
+// dice `allow write`, es un bug.
+//
+// La versión anterior dejaba escribir desde el cliente con condiciones largas
+// (hasOnly de listas de campos, incrementos exactos). Ese enfoque funciona,
+// pero cada campo nuevo era una oportunidad de dejar un agujero abierto, y de
+// hecho hubo varios. Esto lo elimina de raíz.
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Las publicaciones son públicas para leer: cualquiera, con sesión o sin
+    // ella, puede ver el tablero. El documento público NO contiene teléfono ni
+    // email — esos viven en la subcolección privada de abajo.
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if false;
+
+      // Datos de contacto del donante. Inaccesibles desde cualquier cliente.
+      // Solo se leen desde /api/products/[id]/contact, que exige sesión,
+      // perfil completo y registra el contacto contra el límite.
+      match /private/{document=**} {
+        allow read, write: if false;
+      }
+    }
+
+    // Perfiles: cada quien lee el suyo. Sirve para que la app pueda hidratar
+    // el perfil sin una ida extra al servidor. Nada de escritura.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // Alertas de palabra clave: el dueño puede leerlas. Se crean y borran
+    // desde /api/alerts.
+    match /alerts/{alertId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Reportes de publicaciones. Solo el equipo de moderación los ve, y eso
+    // pasa por el servidor.
+    match /reports/{reportId} {
+      allow read, write: if false;
+    }
+
+    // Contadores de rate limiting. Solo servidor.
+    match /rateLimits/{key} {
+      allow read, write: if false;
+    }
+
+    // Cualquier colección futura queda cerrada hasta que alguien decida lo
+    // contrario de forma explícita.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

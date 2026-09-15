@@ -1,0 +1,25 @@
+rules_version = '2';
+
+// ============================================================================
+// Reglas de Storage — Mesira
+//
+// Las fotos de las publicaciones se suben desde /api/products, que valida
+// tipo MIME, tamaño y autoría antes de escribir con el Admin SDK.
+// El navegador nunca sube directo a Storage, así que acá no hay `allow write`.
+//
+// Lectura pública porque las fotos se muestran en el tablero abierto.
+// ============================================================================
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /products/{productId}/{fileName} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

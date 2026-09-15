@@ -1,0 +1,266 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Mesira — sistema visual
+   La justificación de cada decisión está en DESIGN.md. Este archivo es su
+   traducción a tokens; no agregues acá un color o un tamaño que no esté allá.
+   ========================================================================== */
+
+@theme {
+  /* --- Color: tinta sobre papel. El único color saturado significa "disponible". --- */
+  --color-paper: #f2f3ef;
+  --color-surface: #ffffff;
+  --color-surface-2: #fafbf8;
+  --color-ink: #14262e;
+  --color-ink-2: #5c6e77;
+  /* ink-3 NO se usa para texto: no llega a AA sobre papel a propósito, porque su
+     rol es el de un placeholder o el trazo de un ícono. Todo texto usa ink o ink-2. */
+  --color-ink-3: #74838a;
+  --color-rule: #d8dcd6;
+  --color-rule-strong: #b9c0b8;
+
+  --color-green: #17614b;
+  --color-green-hover: #124e3c;
+  --color-green-soft: #e3efe9;
+  --color-green-ink: #0d4636;
+  /* Texto que va ENCIMA del verde. En claro el verde es oscuro, así que va blanco;
+     en oscuro el verde se aclara y el blanco deja de contrastar, así que va tinta. */
+  --color-on-green: #ffffff;
+
+  --color-amber: #8a5309;
+  --color-amber-soft: #f7edda;
+
+  --color-clay: #8c3a22;
+  --color-clay-soft: #f7e7e1;
+
+  /* --- Tipografía: sans es el sistema, serif es una persona. --- */
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-source-serif), ui-serif, Georgia, "Times New Roman", serif;
+
+  --text-micro: 0.75rem;
+  --text-micro--line-height: 1rem;
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.125rem;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.5rem;
+  --text-prose: 1rem;
+  --text-prose--line-height: 1.625rem;
+  --text-h3: 1rem;
+  --text-h3--line-height: 1.375rem;
+  --text-h2: 1.25rem;
+  --text-h2--line-height: 1.625rem;
+  --text-display: 1.875rem;
+  --text-display--line-height: 2.125rem;
+
+  /* --- Radios: escala corta, usada con intención. --- */
+  --radius-chip: 2px;
+  --radius-card: 4px;
+  --radius-dot: 999px;
+
+  --spacing-gutter: 1rem;
+}
+
+/* --- Modo oscuro. Mismos roles, papel oscuro. ---------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-paper: #0f1513;
+    --color-surface: #171e1c;
+    --color-surface-2: #1c2422;
+    --color-ink: #e7ebe5;
+    --color-ink-2: #9aa8a2;
+    --color-ink-3: #7f8f88;
+    --color-rule: #2a3330;
+    --color-rule-strong: #3d4845;
+
+    --color-green: #4e9e80;
+    --color-green-hover: #62b394;
+    --color-green-soft: #16302a;
+    --color-green-ink: #8fd3ba;
+    --color-on-green: #0d1916;
+
+    --color-amber: #d9a25a;
+    --color-amber-soft: #2f2618;
+
+    --color-clay: #d98b70;
+    --color-clay-soft: #2f1d17;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-paper: #0f1513;
+  --color-surface: #171e1c;
+  --color-surface-2: #1c2422;
+  --color-ink: #e7ebe5;
+  --color-ink-2: #9aa8a2;
+  --color-ink-3: #7f8f88;
+  --color-rule: #2a3330;
+  --color-rule-strong: #3d4845;
+  --color-green: #4e9e80;
+  --color-green-hover: #62b394;
+  --color-green-soft: #16302a;
+  --color-green-ink: #8fd3ba;
+  --color-on-green: #0d1916;
+  --color-amber: #d9a25a;
+  --color-amber-soft: #2f2618;
+  --color-clay: #d98b70;
+  --color-clay-soft: #2f1d17;
+}
+
+/* --- Base ----------------------------------------------------------------
+   Todo esto va dentro de @layer base a propósito. En Tailwind v4 las utilidades
+   viven en la capa `utilities`, y en CSS cualquier regla SIN capa le gana a
+   cualquier regla EN una capa, sin importar la especificidad. Si este bloque
+   quedara suelto, un `color: inherit` sobre `button` anularía `text-white` en
+   todos los botones de la app — que es exactamente lo que pasaba antes de
+   moverlo acá.
+   -------------------------------------------------------------------------- */
+
+@layer base {
+  * {
+    border-color: var(--color-rule);
+  }
+
+  html {
+    color-scheme: light dark;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* Barra de estado del celular en la PWA y notch del iPhone. */
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* El foco tiene que verse siempre, y tiene que verse igual en toda la app. */
+  :focus-visible {
+    outline: 2px solid var(--color-green);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  ::selection {
+    background: var(--color-green-soft);
+    color: var(--color-green-ink);
+  }
+
+  /* Los títulos llevan tracking negativo; el cuerpo no. */
+  h1, h2, h3, h4 {
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Tipografía de campos: heredar es lo correcto y los navegadores no lo hacen. */
+  input, textarea, select, button {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* En iOS, un input con menos de 16px hace que la página se acerque sola al enfocarlo. */
+  @media (max-width: 767px) {
+    input, textarea, select {
+      font-size: 16px;
+    }
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Nada se anima si la persona pidió que nada se anime.
+   Va fuera de las capas y con !important a propósito: esta regla tiene que
+   ganarle a cualquier transición declarada con una utilidad. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Utilidades --------------------------------------------------------- */
+
+@utility prose-mesira {
+  font-family: var(--font-serif);
+  font-size: var(--text-prose);
+  line-height: var(--text-prose--line-height);
+  max-width: 68ch;
+}
+
+/* Riel de chips con desplazamiento lateral, sin la barra a la vista. */
+@utility scroll-rail {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+@utility scroll-rail-hide {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Recorta a N líneas. */
+@utility clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+@utility clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+@utility clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Única animación de la app: la aparición de un panel que la persona abrió. */
+@keyframes mesira-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility reveal {
+  animation: mesira-reveal 160ms ease-out;
+}
+
+/* Marcador de carga: un pulso sobrio, sin brillos que se deslizan. */
+@keyframes mesira-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@utility skeleton {
+  background-color: var(--color-rule);
+  animation: mesira-pulse 1.6s ease-in-out infinite;
+}
