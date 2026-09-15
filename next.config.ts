@@ -49,6 +49,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  serverExternalPackages: ["firebase-admin"],
 
   // Un error de tipos tiene que romper el deploy, no colarse a producción.
   // (Next 16 ya no corre ESLint dentro de `next build`: eso lo hace `npm run check`,
