@@ -10,6 +10,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint",
+    "deploy": "node scripts/deploy-all.mjs",
     "admin:set": "node scripts/set-admin.mjs",
     "db:wipe-products": "node scripts/wipe-products.mjs"
   },
