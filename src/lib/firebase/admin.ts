@@ -29,34 +29,37 @@ let cachedApp: App | null = null;
 
 function parseServiceAccount(): ServiceAccountShape {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-  if (!raw || raw.trim() === "") {
-    throw new Error(
-      "Falta FIREBASE_SERVICE_ACCOUNT_KEY. Pegá el JSON completo de la cuenta de servicio en las variables de entorno.",
-    );
+  if (raw && raw.trim() !== "") {
+    try {
+      const parsed = JSON.parse(raw) as Partial<ServiceAccountShape>;
+      if (parsed.project_id && parsed.client_email && parsed.private_key) {
+        return {
+          project_id: parsed.project_id,
+          client_email: parsed.client_email,
+          private_key: parsed.private_key.replace(/\\n/g, "\n"),
+        };
+      }
+    } catch {
+      // Si el JSON falla o viene con escape incorrecto de Vercel, probar fallback abajo
+    }
   }
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    throw new Error(
-      "FIREBASE_SERVICE_ACCOUNT_KEY no es un JSON válido. Tiene que ser el archivo entero de la cuenta de servicio, en una sola línea.",
-    );
+  // Fallback con variables individuales existentes en Vercel
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "mesira-argentina";
+
+  if (clientEmail && privateKey) {
+    return {
+      project_id: projectId,
+      client_email: clientEmail,
+      private_key: privateKey.replace(/\\n/g, "\n"),
+    };
   }
 
-  const account = parsed as Partial<ServiceAccountShape>;
-  if (!account.project_id || !account.client_email || !account.private_key) {
-    throw new Error(
-      "FIREBASE_SERVICE_ACCOUNT_KEY está incompleto: faltan project_id, client_email o private_key.",
-    );
-  }
-
-  return {
-    project_id: account.project_id,
-    client_email: account.client_email,
-    // Vercel guarda los saltos de línea escapados; hay que devolverlos a su forma real.
-    private_key: account.private_key.replace(/\\n/g, "\n"),
-  };
+  throw new Error(
+    "Falta FIREBASE_SERVICE_ACCOUNT_KEY o credenciales de Firebase válidas en las variables de entorno.",
+  );
 }
 
 function getAdminApp(): App {

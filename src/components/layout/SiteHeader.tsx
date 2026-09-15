@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 
 import { Logo } from "@/components/layout/Logo";
 import { Button } from "@/components/ui/Button";
@@ -33,7 +33,13 @@ export function SiteHeader({ user }: { user: SessionUser | null }) {
           <Logo hideWordmarkOnMobile={isFeed} />
         </Link>
 
-        {isFeed ? <SearchBox /> : <div className="flex-1" />}
+        {isFeed ? (
+          <Suspense fallback={<div className="min-w-0 flex-1" />}>
+            <SearchBox />
+          </Suspense>
+        ) : (
+          <div className="flex-1" />
+        )}
 
         <div className="flex shrink-0 items-center gap-2">
           <Link

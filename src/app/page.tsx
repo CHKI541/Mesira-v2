@@ -53,10 +53,14 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       <FirstVisitStrip signedIn={Boolean(user)} />
 
       <div className="flex gap-8 py-5">
-        <FilterSidebar />
+        <Suspense fallback={<div className="hidden w-56 shrink-0 lg:block" />}>
+          <FilterSidebar />
+        </Suspense>
 
         <div className="min-w-0 flex-1">
-          <CategoryRail />
+          <Suspense fallback={<div className="h-10" />}>
+            <CategoryRail />
+          </Suspense>
 
           <Suspense fallback={<FeedSkeleton />}>
             <Feed filters={filters} showIntro={!user} />
