@@ -1,67 +1,110 @@
 # Seguridad
 
-Este documento tiene tres partes: lo que hay que hacer **ya** (rotar claves), qué estaba
-mal en la versión anterior y cómo se arregló, y cómo está protegida esta versión.
+Este documento tiene tres partes: lo que hay que hacer **ya**, qué estaba mal en la
+versión anterior y cómo se arregló, y cómo está protegida esta versión.
+
+> **Estado al 15 de septiembre de 2026, 18:30.** Auditoría completa hecha contra
+> producción. Lo verificado y lo pendiente están en `../ESTADO.md`.
 
 ---
 
 ## 1. Acciones urgentes
 
-Estas no las puede hacer el código. Son tuyas, y conviene hacerlas antes de abrir el
-proyecto nuevo al público.
+### 1.1. Revocar la contraseña de aplicación de Gmail — HACELO HOY
 
-### 1.1. El keystore de Android quedó en el historial de Git — CRÍTICO
+Durante un tiempo, este repositorio (que es **público**) tuvo escrita en texto plano la
+contraseña de aplicación de la cuenta de Gmail de respaldo. Ya se quitó del documento,
+pero **sigue en el historial de Git**, que cualquiera puede leer.
 
-En el repositorio viejo (`github.com/CHKI541/Mesira`) se commitearon y después se
-quitaron estos dos archivos:
+Una contraseña de aplicación de Google da acceso a enviar y leer correo de esa cuenta.
 
-```
-android/mesira-release.keystore      ← el certificado de firma de la app
-android/keystore.properties          ← con la contraseña mesira2026
-```
+**Qué hacer:** entrá a myaccount.google.com → Seguridad → Contraseñas de aplicaciones,
+y revocá la de `xscel05@gmail.com`. No hace falta reemplazarla: esta versión usa la API
+de Resend, no SMTP.
 
-Quitarlos de la rama **no los saca del historial**: siguen siendo recuperables con
-`git log --all` por cualquiera que tenga acceso al repositorio. Si el repo estuvo en
-público, hay que asumir que la clave de firma está comprometida: con ella se puede
-firmar un APK que Android acepte como una actualización legítima de Mesira.
+El valor exacto está en tu archivo local de credenciales, fuera del repositorio.
+
+### 1.2. El keystore de Android y su contraseña estuvieron expuestos
+
+Dos exposiciones distintas, las dos ya cortadas en la superficie pero no en el historial:
+
+- El **archivo** `mesira-release.keystore` y su `keystore.properties` se commitearon al
+  repositorio viejo `github.com/CHKI541/Mesira`. **Ese repositorio ya está borrado**
+  (verificado: da 404), así que la vía principal está cerrada.
+- La **contraseña** del keystore quedó escrita en este documento mientras el repositorio
+  nuevo era público. Ya se quitó del texto, pero permanece en el historial de Git.
+
+Quien haya clonado el repositorio viejo antes del borrado tiene el archivo; quien lea el
+historial de este repositorio tiene la contraseña. Juntos permiten firmar un APK que
+Android aceptaría como actualización legítima de Mesira.
 
 **Qué hacer:**
 
-1. Borrá el repositorio viejo (ya lo tenías planeado). Eso es lo que corta el acceso.
-2. Si la app **todavía no está publicada en Google Play**: generá un keystore nuevo con
-   una contraseña nueva y usá ese de ahora en adelante.
-3. Si **ya está publicada**: no se puede cambiar el keystore de una app existente, salvo
-   que tengas Play App Signing activado, en cuyo caso se pide un cambio de clave de carga
-   desde Play Console. Revisalo antes de la próxima actualización.
-4. El keystore nuevo **nunca** va dentro de la carpeta del repositorio. Guardalo aparte
-   y hacé una copia en otro lado: si lo perdés, no podés volver a actualizar la app.
+- Si la app **todavía no está publicada en Google Play**: generá un keystore nuevo con
+  una contraseña nueva y usá ese de ahora en adelante. Es lo más limpio.
+- Si **ya está publicada**: no se puede cambiar el keystore de una app existente, salvo
+  con Play App Signing, donde se pide un cambio de clave de carga desde Play Console.
+  Revisalo antes de la próxima actualización.
+- El keystore nuevo **nunca** va dentro de una carpeta que sea un repositorio de Git.
+  Guardalo aparte y hacé una copia en otro lado: si lo perdés, no podés volver a
+  actualizar la app.
 
-### 1.2. Claves que estuvieron en texto plano
+### 1.3. Decidí si el repositorio debe ser público
 
-Estas estaban escritas en `INICIO_NUEVA_CONVERSACION.md`, un archivo local que además se
-pegó en conversaciones con asistentes de IA. Ese archivo estaba en `.gitignore`, así que
-no llegó a GitHub, pero igual conviene rotarlas: una clave que pasó por varios lugares ya
-no es una clave secreta.
+`github.com/CHKI541/Mesira-v2` es **público** hoy.
+
+No hay ninguna credencial en los archivos actuales (verificado), pero sí en el historial,
+por lo dicho arriba. Tenés dos caminos:
+
+- **Pasarlo a privado** (Settings → General → Danger Zone → Change visibility). Es lo más
+  simple y no rompe nada: Vercel sigue desplegando igual.
+- **Dejarlo público** y rotar las dos credenciales de 1.1 y 1.2. Un proyecto comunitario
+  abierto tiene su valor, pero entonces la rotación no es opcional.
+
+Si lo dejás público, tené presente que el historial también deja ver los correos de los
+administradores. Eso es incómodo pero no peligroso.
+
+### 1.4. Claves que conviene rotar igual
+
+Estaban en texto plano en archivos locales que además se pegaron en conversaciones con
+asistentes de IA. Nunca llegaron a GitHub, pero una clave que pasó por varios lugares ya
+no es secreta.
 
 | Qué | Dónde se rota |
 | :--- | :--- |
-| Clave privada de la cuenta de servicio de Firebase | Google Cloud Console → IAM → Cuentas de servicio → borrar la clave vieja, generar una nueva |
+| Clave privada de la cuenta de servicio de Firebase | Google Cloud Console → IAM → Cuentas de servicio → generar una nueva, borrar la vieja |
 | API key de Resend | resend.com → API Keys → revocar y crear otra |
-| Contraseña de aplicación de Gmail (`ucynckfqkwimgyho`) | myaccount.google.com → Seguridad → Contraseñas de aplicaciones → revocar. Esta versión no usa SMTP, así que se puede revocar y no reemplazar. |
-| `ADMIN_API_SECRET`, `ALERT_NOTIFY_SECRET` | Ya no existen. Esta versión no los usa. |
 
-La API key pública de Firebase (`NEXT_PUBLIC_FIREBASE_API_KEY`) **no** hace falta rotarla:
-está diseñada para ser pública y viaja en el bundle de cualquier app de Firebase. Lo que
-protege la base no es esa clave, son las reglas de Firestore y las rutas del servidor.
+Al rotar la de Firebase hay que actualizarla en Vercel y en tu `.env.local`.
 
-### 1.3. Restricciones recomendadas en la consola
+### 1.5. Archivos con credenciales sueltos en la carpeta
 
-- **Firebase Auth → Dominios autorizados:** dejá solo `mesira.net`, `www.mesira.net` y
-  `localhost`. Sacá cualquier dominio de Vercel de preview que esté de más.
+En `C:\Users\israe\Mesira\` quedaron cuatro archivos distintos con la clave privada de
+Firebase adentro:
+
+```
+VERCEL_ENV.txt
+vercel.env
+firebase-deploy.json
+INICIO_NUEVA_CONVERSACION.md
+```
+
+Ninguno está en Git (verificado). Pero cuatro copias de una clave privada dando vueltas
+en una carpeta que se conecta a sesiones de IA y que probablemente se respalda a algún
+lado es mucha superficie para nada.
+
+**Qué hacer:** quedate con una sola (`mesira-web\.env.local`, que ya está en `.gitignore`)
+y borrá las otras tres con `Shift + Supr`. Si querés conservar un respaldo, que sea en un
+gestor de contraseñas, no en un `.txt`.
+
+### 1.6. Restricciones recomendadas en las consolas
+
+- **Firebase → Authentication → Settings → Authorized domains:** que queden solo
+  `mesira.net`, `www.mesira.net` y `localhost`.
 - **Google Cloud → Credenciales → la API key del navegador:** restringila por referente
-  HTTP a `mesira.net/*`.
-- **Firebase Storage:** verificá que las reglas desplegadas sean las de `storage.rules`
-  de este repositorio. Si quedaron las viejas, cualquiera con una sesión puede escribir.
+  HTTP a `https://mesira.net/*` y `https://www.mesira.net/*`.
+- **Resend → Domains:** que `mesira.net` esté verificado con SPF y DKIM, o los correos
+  van a spam.
 
 ---
 
@@ -112,7 +155,7 @@ que verifica quién sos y si sos el dueño.
 ### 2.4. La lista de administradores estaba escrita en el código
 
 ```ts
-["israel.chueke@gmail.com", "eli2626cohen@gmail.com"]
+["admin1@ejemplo.com", "admin2@ejemplo.com"]   // eran los correos reales de los administradores
 ```
 
 Repetida en nueve lugares, incluido `app/mi-cuenta/page.tsx`, que es un componente

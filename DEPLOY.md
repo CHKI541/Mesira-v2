@@ -150,7 +150,7 @@ El panel de moderación pide el custom claim `admin`, que no existe todavía.
 
 ```powershell
 cd C:\Users\israe\Mesira\mesira-web
-npm run admin:set -- israel.chueke@gmail.com
+npm run admin:set -- tu-correo@gmail.com
 ```
 
 3. Cerrá sesión en el sitio y volvé a entrar. Ya te aparece "Moderación" en el menú.
